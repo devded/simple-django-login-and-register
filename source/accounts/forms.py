@@ -117,8 +117,7 @@ class SignUpForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data['email']
 
-        user = User.objects.filter(email__iexact=email).exists()
-        if user:
+        if user := User.objects.filter(email__iexact=email).exists():
             raise ValidationError(_('You can not use this email address.'))
 
         return email
@@ -230,8 +229,9 @@ class ChangeEmailForm(forms.Form):
         if email == self.user.email:
             raise ValidationError(_('Please enter another email.'))
 
-        user = User.objects.filter(Q(email__iexact=email) & ~Q(id=self.user.id)).exists()
-        if user:
+        if user := User.objects.filter(
+            Q(email__iexact=email) & ~Q(id=self.user.id)
+        ).exists():
             raise ValidationError(_('You can not use this mail.'))
 
         return email

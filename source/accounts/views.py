@@ -70,16 +70,17 @@ class LogInView(GuestOnlyView, FormView):
 
         # The default Django's "remember me" lifetime is 2 weeks and can be changed by modifying
         # the SESSION_COOKIE_AGE settings' option.
-        if settings.USE_REMEMBER_ME:
-            if not form.cleaned_data['remember_me']:
-                request.session.set_expiry(0)
+        if settings.USE_REMEMBER_ME and not form.cleaned_data['remember_me']:
+            request.session.set_expiry(0)
 
         login(request, form.user_cache)
 
         redirect_to = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME))
-        url_is_safe = is_safe_url(redirect_to, allowed_hosts=request.get_host(), require_https=request.is_secure())
-
-        if url_is_safe:
+        if url_is_safe := is_safe_url(
+            redirect_to,
+            allowed_hosts=request.get_host(),
+            require_https=request.is_secure(),
+        ):
             return redirect(redirect_to)
 
         return redirect(settings.LOGIN_REDIRECT_URL)
